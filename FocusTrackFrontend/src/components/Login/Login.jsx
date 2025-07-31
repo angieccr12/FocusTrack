@@ -4,11 +4,10 @@ import { FaUserCircle, FaKey } from 'react-icons/fa';
 export default function Login() {
   return (
     <div className="login-container">
-
       <div className="login-card">
         <div>
-            <h1 className="login-title">FocusTrack</h1>
-            <p className="login-subtitle">Your time under control</p>
+          <h1 className="login-title">FocusTrack</h1>
+          <p className="login-subtitle">Your time under control</p>
         </div>
         <form>
           <label htmlFor="email" className="login-label">Email address</label>
@@ -24,6 +23,11 @@ export default function Login() {
           </div>
 
           <button type="submit" className="login-button">Log in</button>
+
+          {/* Hipervínculo para recuperar contraseña */}
+          <div style={{ textAlign: 'center', marginTop: '10px' }}>
+            <a href="/recover-password" className="recover-link">Forgot your password?</a>
+          </div>
         </form>
 
         <div className="login-footer">
