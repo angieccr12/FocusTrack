@@ -6,8 +6,10 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 export default function Login() {
   const navigate = useNavigate(); 
-  const [userEmail,setUserEmail] = useState('');
-  const [userPassword,setUserPassword] = useState('');
+  const [formLoginData, setFormLoginData] = useState({
+    email: '',
+    password: ''
+  })
   
   /**
    * Submit login form
@@ -20,10 +22,7 @@ export default function Login() {
   const submit=async(event)=>{
     event.preventDefault();
     try{ 
-      // const response = await axios.post('http://localhost:3001/api/login', {
-      //   email: userEmail,
-      //   password: userPassword
-      // });
+      // const response = await axios.post('http://localhost:3001/api/login', formLoginData);
       // console.log(response.data);
       toast.success('Session started successfully');
       navigate('/dashboard');
@@ -33,6 +32,12 @@ export default function Login() {
     }
 
   }
+  const handleInputChange = (field, value) => {
+    setFormLoginData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
   const signUp=async(event)=>{
     event.preventDefault();
     navigate('/signup');
@@ -47,13 +52,13 @@ export default function Login() {
         <form onSubmit={submit}>
           <label htmlFor="email" className="login-label">Email address</label>
           <div className="login-input-wrapper">
-            <input id="email" type="email" className="login-input" value={userEmail} onChange={(event)=>setUserEmail(event.target.value)} />
+            <input id="email" type="email" className="login-input" value={formLoginData.email} onChange={(e)=>handleInputChange('email', e.target.value)} />
             <FaUserCircle className="login-icon" />
           </div>
 
           <label htmlFor="password" className="login-label">Password</label>
           <div className="login-input-wrapper">
-            <input id="password" type="password" className="login-input" value={userPassword} onChange={(event)=>setUserPassword(event.target.value)} />
+            <input id="password" type="password" className="login-input" value={formLoginData.password} onChange={(e)=>handleInputChange('password', e.target.value)} />
             <FaKey className="login-icon" />
           </div>
 

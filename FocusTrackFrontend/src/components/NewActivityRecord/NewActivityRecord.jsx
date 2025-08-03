@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import './NewActivityRecord.css';
 
 const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) => {
@@ -16,6 +17,9 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
     endAmPm: 'AM'
   });
 
+  const[deviceData, setDevicesData] = useState([]);
+
+
   const hours = Array.from({ length: 12 }, (_, i) => i + 1);
   const minutes = [...Array(60)].map((_, i) => String(i).padStart(2, '0'));
   const ampm = ['AM', 'PM'];
@@ -32,6 +36,17 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
     'TikTok'
   ];
 
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/devices');
+        setDevicesData(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchDevices();
+  },[])
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -141,23 +156,19 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
             <div className="form-group">
               <label className="activity-label">Device</label>
               <select 
-                className="activity-input full"
-                value={formData.device}
+                className="activity-input full" value={formData.device}
                 onChange={(e) => handleInputChange('device', e.target.value)}
               >
                 <option value="">Select a device</option>
-                {devices.length > 0 ? (
-                  devices.map((device) => (
+                {deviceData.length > 0 ? (
+                  deviceData.map((device) => (
                     <option key={device.id} value={device.name}>
                       {device.name} ({device.type})
                     </option>
                   ))
                 ) : (
                   <>
-                    <option value="Phone">Phone</option>
-                    <option value="Tablet">Tablet</option>
-                    <option value="Laptop">Laptop</option>
-                    <option value="Desktop">Desktop</option>
+                    <option value="no-data" disabled>No Data Found</option>
                   </>
                 )}
               </select>

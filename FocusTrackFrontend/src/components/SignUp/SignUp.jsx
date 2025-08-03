@@ -6,14 +6,21 @@ import { toast } from 'react-toastify';
 export default function SignUp() {
   
   const navigate = useNavigate();
-  const [userEmail,setUserEmail] = useState('');
-  const [userPassword,setUserPassword] = useState('');
-  const [userEmailConfirmation,setUserEmailConfirmation] = useState('');
-  const [userPasswordConfirmation,setUserPasswordConfirmation] = useState('');
-
+  const [formUserData, setFormUserData] = useState({
+    email: '',
+    emailConfirmation: '',
+    password: '',
+    passwordConfirmation: ''
+  });
+  const handleInputChange = (field, value) => {
+    setFormUserData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
   const submit=async(event)=>{
     event.preventDefault();
-    if(!userEmail || !userPassword || !userEmailConfirmation || !userPasswordConfirmation){
+    if(!formUserData.email || !formUserData.emailConfirmation || !formUserData.password || !formUserData.passwordConfirmation){
       toast.error('All fields are required');
     }else{ 
       await createUser();
@@ -21,13 +28,7 @@ export default function SignUp() {
   }
   const createUser=async()=>{
     try{
-      const response = await axios.post('http://localhost:3001/api/signup', {
-        email: userEmail,
-        emailConfirmation: userEmailConfirmation,
-        password: userPassword,
-        passwordConfirmation: userPasswordConfirmation
-      
-      })
+      const response = await axios.post('http://localhost:3001/api/signup', formUserData)
       toast.success('User created successfully');
       navigate('/dashboard');
     }catch(error){
@@ -49,10 +50,10 @@ export default function SignUp() {
             <input type="text" placeholder="Name" className="signup-input" />
             <input type="text" placeholder="Last name" className="signup-input" />
           </div> */}
-          <input type="email" placeholder="Email address" className="signup-input full" value={userEmail} onChange={(e) => setUserEmail(e.target.value)}/>
-          <input type="email" placeholder="Repeat email address" className="signup-input full" value={userEmailConfirmation} onChange={(e) => setUserEmailConfirmation(e.target.value)}/>
-          <input type="password" placeholder="New password" className="signup-input full" value={userPassword} onChange={(e) => setUserPassword(e.target.value)}/>
-          <input type="password" placeholder="Repeat password" className="signup-input full" value={userPasswordConfirmation} onChange={(e) => setUserPasswordConfirmation(e.target.value)}/>
+          <input type="email" placeholder="Email address" className="signup-input full" value={formUserData.email} onChange={(e) => handleInputChange('email', e.target.value)}/>
+          <input type="email" placeholder="Repeat email address" className="signup-input full" value={formUserData.emailConfirmation} onChange={(e) => handleInputChange('emailConfirmation', e.target.value)}/>
+          <input type="password" placeholder="New password" className="signup-input full" value={formUserData.password} onChange={(e) => handleInputChange('password', e.target.value)}/>
+          <input type="password" placeholder="Repeat password" className="signup-input full" value={formUserData.passwordConfirmation} onChange={(e) => handleInputChange('passwordConfirmation', e.target.value)}/>
 
           <button type="submit" className="signup-button">Sign Up</button>
         </form>

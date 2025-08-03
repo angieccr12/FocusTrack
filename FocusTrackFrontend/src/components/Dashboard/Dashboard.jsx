@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import { UserCircle } from 'lucide-react';
 import Statistics from '../Statistics/Statistics';
@@ -5,6 +6,7 @@ import AddDevice from '../AddDevice/AddDevice';
 import NewActivityRecord from '../NewActivityRecord/NewActivityRecord';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const Dashboard = () => {
   const [showAddDeviceForm, setShowAddDeviceForm] = useState(false);
@@ -15,18 +17,45 @@ const Dashboard = () => {
   const [activityRecords, setActivityRecords] = useState([]);
   const navigate = useNavigate();
 
-  const handleAddDevice = (newDevice) => {
-    setDevices([...devices, { ...newDevice, id: Date.now() }]);
+  const handleAddDevice = async (newDevice) => {
+    //setDevices([...devices, { ...newDevice, id: Date.now() }]);
+    try{
+      const response = await axios.post('http://localhost:3001/api/devices', newDevice);
+      toast.success('Device added successfully');
+      setShowAddDeviceForm(false);
+    }catch(error){
+      console.log(error);
+      toast.error('Error adding device'+ error.message);
+    }
   };
 
-  const handleSaveRecord = (recordData) => {
-    setActivityRecords([...activityRecords, { ...recordData, id: Date.now() }]);
+
+  const handleSaveRecord = async(recordData) => {
+    //setActivityRecords([...activityRecords, { ...recordData, id: Date.now() }]);
+    try{
+      const response = await axios.post('http://localhost:3001/api/records', recordData);
+      toast.success('Record added successfully');
+      setShowActivityForm(false);
+      await getRecordData();
+    }catch(error){
+      console.log(error);
+      toast.error('Error adding record'+ error.message);
+    }
   };
 
+  const getRecordData = async () => {
+    try {
+      // const response = await axios.get(`http://localhost:3001/api/records/${userId}`);
+      // setActivityRecords(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
   const handleLogout = () => {
-    alert('Session closed successfully');
+    toast.success('Session ended successfully');
     navigate('/login');
   };
+
 
   return (
     <div className="dashboard-container">
@@ -39,7 +68,7 @@ const Dashboard = () => {
           />
           {showProfileMenu && (
             <div className="profile-menu">
-              <button onClick={handleLogout}>Log Out</button>
+              <button className='logout-button' onClick={handleLogout}>Log Out</button>
             </div>
           )}
         </div>
@@ -68,7 +97,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <Statistics selectedView={selectedView} />
+      <Statistics selectedView={selectedView} recordData={activityRecords}/>
 
       <AddDevice
         isVisible={showAddDeviceForm}
@@ -97,7 +126,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      {activityRecords.length > 0 && (
+      {/* {activityRecords.length > 0 && (
         <div className="records-list">
           <h3>Recent Activity Records</h3>
           <div className="records-grid">
@@ -115,7 +144,7 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

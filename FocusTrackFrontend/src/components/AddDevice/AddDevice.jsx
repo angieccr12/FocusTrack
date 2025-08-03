@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './AddDevice.css';
 
 const AddDevice = ({ isVisible, onClose, onAddDevice }) => {
-  const [device, setDevice] = useState({ name: '', type: '' });
+  const [device , setDevice] = useState({ name: '', type: 'selec-type' });
 
   const handleSave = () => {
     if (device.name && device.type) {
@@ -40,7 +40,7 @@ const AddDevice = ({ isVisible, onClose, onAddDevice }) => {
             onChange={(e) => setDevice({ ...device, type: e.target.value })}
             className="device-select"
           >
-            <option value="">Select type</option>
+            <option value="selec-type" disabled>Select Type </option>
             <option value="pc">PC</option>
             <option value="tablet">Tablet</option>
             <option value="mobile">Mobile</option>
@@ -52,11 +52,7 @@ const AddDevice = ({ isVisible, onClose, onAddDevice }) => {
           <button onClick={handleCancel} className="btn btn-cancel">
             Cancel
           </button>
-          <button 
-            onClick={handleSave} 
-            className="btn btn-save"
-            disabled={!device.name || !device.type}
-          >
+          <button onClick={handleSave} className="btn btn-save" disabled={!device.name || device.type=='selec-type'}>
             Save
           </button>
         </div>
