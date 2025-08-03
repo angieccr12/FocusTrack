@@ -2,8 +2,19 @@ require('dotenv').config();
 
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3000;
 
+const PORT = process.env.PORT || 3000;
+const cors = require('cors');
+require('dotenv').config();
+
+
+// Habilitar CORS para el frontend en localhost:5173
+app.use(cors({
+  origin: 'http://localhost:5173', // el origen permitido
+  credentials: true               // si usas cookies o headers personalizados
+}));
+
+app.use(express.json());
 const pool = require('./db'); // Conexion bd
 const appRoutes = require('./routes/appRoutes.js');
 const deviceRoutes = require('./routes/deviceRoutes.js');

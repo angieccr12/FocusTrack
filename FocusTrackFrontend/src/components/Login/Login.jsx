@@ -1,4 +1,4 @@
-//import axios from 'axios';
+import axios from 'axios';
 import { useState } from 'react';
 import './Login.css';
 import { FaUserCircle, FaKey } from 'react-icons/fa';
@@ -22,13 +22,17 @@ export default function Login() {
   const submit=async(event)=>{
     event.preventDefault();
     try{ 
-      // const response = await axios.post('http://localhost:3001/api/login', formLoginData);
-      // console.log(response.data);
-      toast.success('Session started successfully');
+      const response = await axios.post('http://localhost:3000/api/auth/login', formLoginData);
+      const message = response?.data?.message??'Session started successfully';
+      toast.success(message);
+      console.log(response.data);
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
       navigate('/dashboard');
     }catch(error){
+      const message = error?.response?.data?.message??'Error logging in';
       console.log(error);
-      toast.error('Error logging in'+ error.message);
+      toast.error(message);
     }
 
   }
