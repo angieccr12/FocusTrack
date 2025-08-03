@@ -62,17 +62,14 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
       alert('Please select a device');
       return;
     }
-    
     if (!customApp && !formData.application) {
       alert('Please select an application');
       return;
     }
-    
     if (customApp && !formData.customApplication.trim()) {
       alert('Please enter the application name');
       return;
     }
-
     if (!formData.date) {
       alert('Please select a date');
       return;
@@ -158,7 +155,7 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
               <select 
                 className="activity-input full" value={formData.device}
                 onChange={(e) => handleInputChange('device', e.target.value)}
-              >
+              >              
                 <option value="">Select a device</option>
                 {deviceData.length > 0 ? (
                   deviceData.map((device) => (

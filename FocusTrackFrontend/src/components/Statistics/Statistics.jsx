@@ -13,7 +13,7 @@ import './Statistics.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
-const Statistics = ({ selectedView }) => {
+const Statistics = ({ selectedView, recordData }) => {
   // Paleta fija
   const colors = ['#213448', '#547792', '#94B4C1', '#a87f57', '#4A4947', '#e2e2e2'];
 
