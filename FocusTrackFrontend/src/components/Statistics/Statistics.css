@@ -1,0 +1,136 @@
+.statistics-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: var(--cream);
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statistics-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--dark-blue);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Selector de fechas */
+.date-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--white);
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.date-selector span {
+  font-weight: 500;
+  color: var(--dark-blue);
+}
+
+.date-selector button {
+  background-color: var(--light-beige);
+  border: none;
+  color: var(--white);
+  font-weight: bold;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.date-selector button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.date-selector button:hover:not(:disabled) {
+  background-color: var(--medium-blue);
+}
+
+/* Secciones de gráficas */
+.charts-section {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 2rem;
+}
+
+.charts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .charts-container {
+    flex-direction: row;
+  }
+}
+
+.chart-card {
+  background-color: var(--white);
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  width: 100%;
+  max-width: 350px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-card h3 {
+  margin-bottom: 1rem;
+  color: var(--dark-blue);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.chart-wrapper {
+  flex: 1;
+  position: relative;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .statistics-container {
+    padding: 1rem;
+  }
+
+  .statistics-title {
+    font-size: 1.25rem;
+  }
+
+  .chart-card {
+    max-width: none;
+    height: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-card {
+    height: 260px;
+  }
+
+  .date-selector {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .date-selector button {
+    width: 100%;
+  }
+}

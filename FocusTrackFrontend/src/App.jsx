@@ -4,12 +4,14 @@ import SignUp from './components/SignUp/SignUp';
 import Dashboard from './components/Dashboard/Dashboard';
 import NewActivityRecord from './components/NewActivityRecord/NewActivityRecord';
 import RecoverPassword from './components/RecoverPassword/RecoverPassword';
+import {ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
-  const user = localStorage.getItem('user');
-
+  //const user = localStorage.getItem('user');
   return (
     <Router>
+      <ToastContainer position='top-center' autoClose={6000}/>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
