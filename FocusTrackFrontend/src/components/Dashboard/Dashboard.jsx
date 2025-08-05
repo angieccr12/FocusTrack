@@ -1,4 +1,3 @@
-// Dashboard.jsx
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { UserCircle } from 'lucide-react';
@@ -18,22 +17,41 @@ const Dashboard = () => {
   const [activityRecords, setActivityRecords] = useState([]);
   const navigate = useNavigate();
 
+  const fetchDevices = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:3001/api/devices', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setDevices(response.data);
+    } catch (error) {
+      console.log('Error fetching devices:', error);
+    }
+  };
+
+  const fetchStatistics = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:3001/api/reports/${selectedView}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setActivityRecords(response.data);
+    } catch (error) {
+      console.error('Error fetching statistics:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchDevices = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:3001/api/devices', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setDevices(response.data);
-      } catch (error) {
-        console.log('Error fetching devices:', error);
-      }
-    };
     fetchDevices();
   }, []);
+
+  useEffect(() => {
+    fetchStatistics();
+  }, [selectedView]);
 
   const handleAddDevice = async (newDevice) => {
     try {
@@ -54,21 +72,18 @@ const Dashboard = () => {
 
   const handleSaveRecord = async (recordData) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/records', recordData);
+      const token = localStorage.getItem('token');
+      const response = await axios.post('http://localhost:3001/api/activity', recordData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       toast.success('Record added successfully');
       setShowActivityForm(false);
-      await getRecordData();
+      await fetchStatistics();
     } catch (error) {
       console.log(error);
       toast.error('Error adding record: ' + error.message);
-    }
-  };
-
-  const getRecordData = async () => {
-    try {
-      // Future use: fetch activity records
-    } catch (error) {
-      console.log(error);
     }
   };
 
