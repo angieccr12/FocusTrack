@@ -9,18 +9,15 @@ router.post(
   '/',
   authenticateToken,
   [
-    body('deviceid').isInt().withMessage('deviceid must be an integer'),
-    body('appname').notEmpty().withMessage('appname is required'),
-    body('date').isISO8601().withMessage('date must be in format YYYY-MM-DD'),
-    body('starttime')
+    body('deviceId').isInt().withMessage('deviceId must be an integer'),
+    body('appName').notEmpty().withMessage('appName is required'),
+    body('recordDate').isISO8601().withMessage('recordDate must be in format YYYY-MM-DD'),
+    body('startTime')
       .matches(/^([01]\d|2[0-3]):([0-5]\d)$/)
-      .withMessage('starttime must be in HH:mm format'),
-    body('endtime')
+      .withMessage('startTime must be in HH:mm format'),
+    body('endTime')
       .matches(/^([01]\d|2[0-3]):([0-5]\d)$/)
-      .withMessage('endtime must be in HH:mm format'),
-    body('duration')
-      .isInt({ min: 1 })
-      .withMessage('duration must be a positive integer'),
+      .withMessage('endTime must be in HH:mm format'),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -28,36 +25,35 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { deviceid, appname, date, starttime, endtime, duration } = req.body;
-    const userId = req.user.id;
+    const { deviceId, appName, recordDate, startTime, endTime } = req.body;
 
     try {
-      // Verificar si la app ya existe para este usuario
+      // Verificar si la app ya existe (sin userId porque App no tiene esa columna)
       let appResult = await pool.query(
-        'SELECT appid FROM "App" WHERE userid = $1 AND appname = $2',
-        [userId, appname]
+        'SELECT "appId" FROM "App" WHERE LOWER("appName") = LOWER($1)',
+        [appName]
       );
 
-      let appid;
+      let appId;
       if (appResult.rows.length > 0) {
-        appid = appResult.rows[0].appid;
+        appId = appResult.rows[0].appId;
       } else {
-        // Si no existe, insertarla
+        // Insertar nueva app
         const insertApp = await pool.query(
-          'INSERT INTO "App" (userid, appname) VALUES ($1, $2) RETURNING appid',
-          [userId, appname]
+          'INSERT INTO "App" ("appName") VALUES ($1) RETURNING "appId"',
+          [appName]
         );
-        appid = insertApp.rows[0].appid;
+        appId = insertApp.rows[0].appId;
       }
 
-      // Ahora registrar la actividad
+      // Registrar la actividad
       const activityResult = await pool.query(
         `
-        INSERT INTO "ActivityRecord" (userid, deviceid, appid, date, starttime, endtime, duration)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO "ActivityRecord" ("appId", "deviceId", "recordDate", "startTime", "endTime")
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING *
         `,
-        [userId, deviceid, appid, date, starttime, endtime, duration]
+        [appId, deviceId, recordDate, startTime, endTime]
       );
 
       res.status(201).json(activityResult.rows[0]);

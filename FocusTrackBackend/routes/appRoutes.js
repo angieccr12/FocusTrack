@@ -6,15 +6,15 @@ const authenticateToken = require('../middleware/authMiddleware');
 // Ruta para registrar una nueva aplicación (requiere autenticación)
 router.post('/', authenticateToken, async (req, res) => {
   const { appName } = req.body;
-  // Validación básica: el nombre de la aplicación no puede estar vacío
+
   if (!appName) {
     return res.status(400).json({ error: 'El nombre de la aplicación es requerido' });
   }
 
   try {
-    // Validar si la aplicación ya existe para evitar duplicados
+    // Validar si la aplicación ya existe
     const duplicateCheck = await pool.query(
-      'SELECT * FROM "App" WHERE LOWER(appName) = LOWER($1)',
+      'SELECT * FROM "App" WHERE LOWER("appName") = LOWER($1)',
       [appName]
     );
 
@@ -22,11 +22,12 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'La aplicación ya está registrada' });
     }
 
-    // Insertar la nueva aplicación en la base de datos
+    // Insertar la nueva aplicación
     const result = await pool.query(
-      'INSERT INTO "App" (appName) VALUES ($1) RETURNING *',
+      'INSERT INTO "App" ("appName") VALUES ($1) RETURNING *',
       [appName]
     );
+
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error('Error registrando aplicación:', error);
@@ -37,9 +38,8 @@ router.post('/', authenticateToken, async (req, res) => {
 // Ruta para obtener todas las aplicaciones registradas (requiere autenticación)
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    // Obtener todas las apps de la base de datos
     const result = await pool.query('SELECT * FROM "App"');
-    res.status(200).json(result.rows); // Devolver lista de apps
+    res.status(200).json(result.rows);
   } catch (error) {
     console.error('Error al obtener apps:', error);
     res.status(500).json({ error: 'Error del servidor al obtener apps' });

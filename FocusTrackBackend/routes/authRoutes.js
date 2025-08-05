@@ -5,55 +5,68 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 
-// Ruta de registro de usuario
+// Registro de usuario
 router.post(
   '/register',
   [
     body('email').isEmail().withMessage('Invalid email'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 chars'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
     body('first_name').notEmpty().withMessage('First name is required'),
     body('last_name').notEmpty().withMessage('Last name is required'),
   ],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ message: errors.array()[0].msg });
     }
 
     const { email, password, first_name, last_name } = req.body;
 
     try {
-      const userExists = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
-      if (userExists.rows.length > 0) {
-        return res.status(400).json({ error: 'Email already registered' });
+      const existingUser = await pool.query(
+        'SELECT * FROM "User" WHERE "userEmail" = $1',
+        [email]
+      );
+
+      if (existingUser.rows.length > 0) {
+        return res.status(400).json({ message: 'Email already registered' });
       }
 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
       const newUser = await pool.query(
-        `INSERT INTO "User" (email, password, first_name, last_name)
-         VALUES ($1, $2, $3, $4) RETURNING userid, email, first_name, last_name`,
+        `INSERT INTO "User" ("userEmail", "userPassword", "userFirstName", "userLastName")
+         VALUES ($1, $2, $3, $4)
+         RETURNING "userId", "userEmail", "userFirstName", "userLastName"`,
         [email, hashedPassword, first_name, last_name]
       );
 
       const user = newUser.rows[0];
-
       const token = jwt.sign(
-        { id: user.userid, email: user.email },
+        { id: user.userId, email: user.userEmail },
         process.env.JWT_SECRET,
         { expiresIn: '1h' }
       );
 
-      res.status(201).json({ user, token });
-    } catch (error) {
-      console.error('Error registering user:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(201).json({
+        message: 'User registered successfully',
+        user: {
+          userId: user.userId,
+          email: user.userEmail,
+          firstName: user.userFirstName,
+          lastName: user.userLastName,
+        },
+        token,
+      });
+    } catch (err) {
+      console.error('Register error:', err.message);
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 );
 
-// Ruta de inicio de sesión
+// Inicio de sesión
 router.post(
   '/login',
   [
@@ -63,42 +76,47 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ message: errors.array()[0].msg });
     }
 
     const { email, password } = req.body;
 
     try {
-      const userResult = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
-      if (userResult.rows.length === 0) {
-        return res.status(400).json({ error: 'Invalid credentials' });
+      const result = await pool.query(
+        'SELECT * FROM "User" WHERE "userEmail" = $1',
+        [email]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(400).json({ message: 'Invalid credentials' });
       }
 
-      const user = userResult.rows[0];
+      const user = result.rows[0];
+      const isValid = await bcrypt.compare(password, user.userPassword);
 
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ error: 'Invalid credentials' });
+      if (!isValid) {
+        return res.status(400).json({ message: 'Invalid credentials' });
       }
 
       const token = jwt.sign(
-        { id: user.userid, email: user.email },
+        { id: user.userId, email: user.userEmail },
         process.env.JWT_SECRET,
         { expiresIn: '1h' }
       );
 
       res.json({
+        message: 'Session started successfully',
         user: {
-          userid: user.userid,
-          email: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
+          userId: user.userId,
+          email: user.userEmail,
+          firstName: user.userFirstName,
+          lastName: user.userLastName,
         },
         token,
       });
-    } catch (error) {
-      console.error('Login error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    } catch (err) {
+      console.error('Login error:', err.message);
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 );

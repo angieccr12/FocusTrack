@@ -9,19 +9,21 @@ router.get('/app-time', authenticateToken, async (req, res) => {
   const { start, end } = req.query;
 
   let query = `
-    SELECT a.appname, SUM(ar.duration)::int AS total_minutes
+    SELECT a."appName", 
+           SUM(EXTRACT(EPOCH FROM (ar."endTime" - ar."startTime")) / 60)::INT AS total_minutes
     FROM "ActivityRecord" ar
-    JOIN "App" a ON ar.appid = a.appid
-    WHERE ar.userid = $1
+    JOIN "App" a ON ar."appId" = a."appId"
+    JOIN "Device" d ON ar."deviceId" = d."deviceId"
+    WHERE d."userId" = $1
   `;
   const values = [userId];
 
   if (start && end) {
-    query += ` AND ar.date BETWEEN $2 AND $3`;
+    query += ` AND ar."recordDate" BETWEEN $2 AND $3`;
     values.push(start, end);
   }
 
-  query += ` GROUP BY a.appname ORDER BY total_minutes DESC`;
+  query += ` GROUP BY a."appName" ORDER BY total_minutes DESC`;
 
   try {
     const result = await pool.query(query, values);
@@ -38,19 +40,20 @@ router.get('/device-time', authenticateToken, async (req, res) => {
   const { start, end } = req.query;
 
   let query = `
-    SELECT d.devicename, SUM(ar.duration)::int AS total_minutes
+    SELECT d."deviceName", 
+           SUM(EXTRACT(EPOCH FROM (ar."endTime" - ar."startTime")) / 60)::INT AS total_minutes
     FROM "ActivityRecord" ar
-    JOIN "Device" d ON ar.deviceid = d.deviceid
-    WHERE ar.userid = $1
+    JOIN "Device" d ON ar."deviceId" = d."deviceId"
+    WHERE d."userId" = $1
   `;
   const values = [userId];
 
   if (start && end) {
-    query += ` AND ar.date BETWEEN $2 AND $3`;
+    query += ` AND ar."recordDate" BETWEEN $2 AND $3`;
     values.push(start, end);
   }
 
-  query += ` GROUP BY d.devicename ORDER BY total_minutes DESC`;
+  query += ` GROUP BY d."deviceName" ORDER BY total_minutes DESC`;
 
   try {
     const result = await pool.query(query, values);
@@ -61,29 +64,28 @@ router.get('/device-time', authenticateToken, async (req, res) => {
   }
 });
 
-// Ruta: Tiempo total por dispositivo y aplicación
+// Ruta: Tiempo total por aplicación y dispositivo
 router.get('/app-device', authenticateToken, async (req, res) => {
   const userId = req.user.id;
   const { start, end } = req.query;
 
   let query = `
-    SELECT d.devicename, a.appname, SUM(ar.duration)::int AS total_minutes
+    SELECT d."deviceName", a."appName",
+           SUM(EXTRACT(EPOCH FROM (ar."endTime" - ar."startTime")) / 60)::INT AS total_minutes
     FROM "ActivityRecord" ar
-    JOIN "App" a ON ar.appid = a.appid
-    JOIN "Device" d ON ar.deviceid = d.deviceid
-    WHERE ar.userid = $1
+    JOIN "App" a ON ar."appId" = a."appId"
+    JOIN "Device" d ON ar."deviceId" = d."deviceId"
+    WHERE d."userId" = $1
   `;
   const values = [userId];
 
   if (start && end) {
-    query += ` AND ar.date BETWEEN $2 AND $3`;
+    query += ` AND ar."recordDate" BETWEEN $2 AND $3`;
     values.push(start, end);
   }
 
-  query += `
-    GROUP BY d.devicename, a.appname
-    ORDER BY d.devicename ASC, total_minutes DESC
-  `;
+  query += ` GROUP BY d."deviceName", a."appName"
+             ORDER BY d."deviceName" ASC, total_minutes DESC`;
 
   try {
     const result = await pool.query(query, values);
