@@ -1,102 +1,106 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
 
-router.post('/register', async (req, res) => {
-  const { email, password, first_name, last_name } = req.body;
-
-  // 1️⃣ Validar que no falten campos
-  if (!email || !password || !first_name || !last_name) {
-    return res.status(400).json({ message: 'Todos los campos son requeridos' });
-  }
-
-  // 2️⃣ Validar formato de correo
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ message: 'Formato de correo inválido' });
-  }
-
-  try {
-    const checkUser = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
-    if (checkUser.rows.length > 0) {
-      return res.status(409).json({ message: 'Este correo ya está registrado' });
+// Ruta de registro de usuario
+router.post(
+  '/register',
+  [
+    body('email').isEmail().withMessage('Invalid email'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 chars'),
+    body('first_name').notEmpty().withMessage('First name is required'),
+    body('last_name').notEmpty().withMessage('Last name is required'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const { email, password, first_name, last_name } = req.body;
 
-    const result = await pool.query(
-      'INSERT INTO "User" (email, password, first_name, last_name) VALUES ($1, $2, $3, $4) RETURNING userid, email, first_name, last_name',
-      [email, hashedPassword, first_name, last_name]
-    );
-
-  const user = result.rows[0];
-
-  const token = jwt.sign(
-    { id: user.userid, email: user.email },
-    process.env.JWT_SECRET,
-    { expiresIn: '2h' }
-  );
-
-  res.status(201).json({
-    message: 'Usuario registrado correctamente',
-    token,
-    user
-  });
-
-  } catch (err) {
-  console.error(' Error al registrar usuario:', err.message);
-  res.status(500).json({ message: err.message });
-  }
-});
-
-// Inicio de sesión
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email y contraseña son requeridos' });
-  }
-
-  try {
-    const result = await pool.query(
-      'SELECT * FROM "User" WHERE email = $1',
-      [email]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-
-    const user = result.rows[0];
-
-    // const passwordMatch = await bcrypt.compare(password, user.password);
-    // if (!passwordMatch) {
-    //   return res.status(401).json({ message: 'Contraseña incorrecta' });
-    // }
-
-    const token = jwt.sign(
-      { id: user.userid, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '2h' }
-    );
-
-    res.status(200).json({
-      message: 'Inicio de sesión exitoso',
-      token,
-      user: {
-        id: user.userid,
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name
+    try {
+      const userExists = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
+      if (userExists.rows.length > 0) {
+        return res.status(400).json({ error: 'Email already registered' });
       }
-    });
-  } catch (err) {
-    console.error('Error en login:', err);
-    res.status(500).json({ message: 'Error en el servidor' });
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      const newUser = await pool.query(
+        `INSERT INTO "User" (email, password, first_name, last_name)
+         VALUES ($1, $2, $3, $4) RETURNING userid, email, first_name, last_name`,
+        [email, hashedPassword, first_name, last_name]
+      );
+
+      const user = newUser.rows[0];
+
+      const token = jwt.sign(
+        { id: user.userid, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      res.status(201).json({ user, token });
+    } catch (error) {
+      console.error('Error registering user:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
-});
+);
+
+// Ruta de inicio de sesión
+router.post(
+  '/login',
+  [
+    body('email').isEmail().withMessage('Invalid email'),
+    body('password').notEmpty().withMessage('Password is required'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email, password } = req.body;
+
+    try {
+      const userResult = await pool.query('SELECT * FROM "User" WHERE email = $1', [email]);
+      if (userResult.rows.length === 0) {
+        return res.status(400).json({ error: 'Invalid credentials' });
+      }
+
+      const user = userResult.rows[0];
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ error: 'Invalid credentials' });
+      }
+
+      const token = jwt.sign(
+        { id: user.userid, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      res.json({
+        user: {
+          userid: user.userid,
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+        },
+        token,
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+);
 
 module.exports = router;

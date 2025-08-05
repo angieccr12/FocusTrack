@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
-const authenticateToken = require('../middleware/authMiddleware'); // ✅ Importado
-
-// Ruta protegida
+const authenticateToken = require('../middleware/authMiddleware'); 
+//Obtiene el historial de actividades del usuario autenticado, incluyendo duración, app y dispositivo utilizados
 router.get('/', authenticateToken, async (req, res) => {
-  const userId = req.user.id; // ✅ Se toma desde el JWT
+  const userId = req.user.id; 
 
   try {
+ // Consulta SQL para obtener registros de actividad junto con información de la app y el dispositivo
     const result = await pool.query(
       `
       SELECT 
@@ -26,7 +26,7 @@ router.get('/', authenticateToken, async (req, res) => {
       `,
       [userId]
     );
-
+    // Retorna el historial de registros
     res.json(result.rows);
   } catch (error) {
     console.error('Error al obtener historial:', error);

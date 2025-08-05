@@ -28,7 +28,7 @@ export default function SignUp() {
   }
   const createUser=async()=>{
     try{
-      const response = await axios.post('http://localhost:3001/api/signup', formUserData)
+      const response = await axios.post('http://localhost:3000/api/auth/register', formUserData)
       toast.success('User created successfully');
       navigate('/dashboard');
     }catch(error){
@@ -46,10 +46,10 @@ export default function SignUp() {
         <hr className="signup-divider" />
 
         <form className="signup-form" onSubmit={submit}>
-          {/* <div className="signup-row">
+          <div className="signup-row">
             <input type="text" placeholder="Name" className="signup-input" />
             <input type="text" placeholder="Last name" className="signup-input" />
-          </div> */}
+          </div>
           <input type="email" placeholder="Email address" className="signup-input full" value={formUserData.email} onChange={(e) => handleInputChange('email', e.target.value)}/>
           <input type="email" placeholder="Repeat email address" className="signup-input full" value={formUserData.emailConfirmation} onChange={(e) => handleInputChange('emailConfirmation', e.target.value)}/>
           <input type="password" placeholder="New password" className="signup-input full" value={formUserData.password} onChange={(e) => handleInputChange('password', e.target.value)}/>
