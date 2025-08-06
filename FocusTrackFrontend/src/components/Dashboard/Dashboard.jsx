@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { UserCircle } from 'lucide-react';
 import Statistics from '../Statistics/Statistics';
 import AddDevice from '../AddDevice/AddDevice';
-import NewActivityRecord from '../NewActivityRecord/NewActivityRecord';
 import './Dashboard.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import AddActivityRecord from "../NewActivityRecord/NewActivityRecord";
 
 const Dashboard = () => {
   const [showAddDeviceForm, setShowAddDeviceForm] = useState(false);
@@ -20,7 +20,7 @@ const Dashboard = () => {
   const fetchDevices = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/devices', {
+      const response = await axios.get('http://localhost:3000/api/devices', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -34,7 +34,7 @@ const Dashboard = () => {
   const fetchStatistics = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3001/api/reports/${selectedView}`, {
+      const response = await axios.get(`http://localhost:3000/api/reports/${selectedView}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -53,17 +53,25 @@ const Dashboard = () => {
     fetchStatistics();
   }, [selectedView]);
 
-  const handleAddDevice = async (newDevice) => {
+  const handleAddDevice = async (device) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:3001/api/devices', newDevice, {
+
+      const newDevice = {
+        deviceName: device.name,
+        deviceType: device.type
+      };
+
+      const response = await axios.post('http://localhost:3000/api/devices', newDevice, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
+
       toast.success('Device added successfully');
       setDevices(prev => [...prev, response.data]);
       setShowAddDeviceForm(false);
+
     } catch (error) {
       console.log(error);
       toast.error('Error adding device: ' + error.message);
@@ -73,7 +81,7 @@ const Dashboard = () => {
   const handleSaveRecord = async (recordData) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:3001/api/activity', recordData, {
+      const response = await axios.post('http://localhost:3000/api/activity', recordData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -140,14 +148,14 @@ const Dashboard = () => {
         onAddDevice={handleAddDevice}
       />
 
-      <NewActivityRecord
+      <AddActivityRecord
         isVisible={showActivityForm}
         onClose={() => setShowActivityForm(false)}
         onSaveRecord={handleSaveRecord}
         devices={devices}
       />
 
-      {devices.length > 0 && (
+      {/*devices.length > 0 && (
         <div className="devices-list">
           <h3>Connected Devices</h3>
           <div className="devices-grid">
@@ -159,7 +167,7 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-      )}
+      )*/}
     </div>
   );
 };

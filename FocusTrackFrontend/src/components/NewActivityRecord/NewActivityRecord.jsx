@@ -17,14 +17,7 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
     endAmPm: 'AM'
   });
 
-  const[deviceData, setDevicesData] = useState([]);
-
-
-  const hours = Array.from({ length: 12 }, (_, i) => i + 1);
-  const minutes = [...Array(60)].map((_, i) => String(i).padStart(2, '0'));
-  const ampm = ['AM', 'PM'];
-
-  const existingApps = [
+    const existingApps = [
     'Instagram',
     'YouTube', 
     'Spotify',
@@ -36,17 +29,11 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
     'TikTok'
   ];
 
-  useEffect(() => {
-    const fetchDevices = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/api/devices');
-        setDevicesData(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchDevices();
-  },[])
+  const getDeviceIdByName = (deviceName) => {
+  const device = devices.find(d => d.deviceName === deviceName);
+  return device ? device.deviceId : null;
+  };
+  
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -85,15 +72,27 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
     }
 
     const recordData = {
-      ...formData,
-      application: customApp ? formData.customApplication : formData.application,
-      duration: calculateDuration(startTime, endTime),
-      id: Date.now()
+      deviceId: getDeviceIdByName(formData.device),
+      appName: customApp ? formData.customApplication : formData.application,
+      recordDate: formData.date,
+      startTime: convertTo24h(formData.startHour, formData.startMinute, formData.startAmPm),
+      endTime: convertTo24h(formData.endHour, formData.endMinute, formData.endAmPm)
     };
 
-    onSaveRecord(recordData);
-    handleReset();
-    onClose();
+    axios.post('http://localhost:3000/api/activity', recordData, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    .then(() => {
+      alert('Record saved successfully!');
+      handleReset();
+      onClose();
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Error saving record');
+    });
   };
 
   const convertToMinutes = (hour, minute, ampm) => {
@@ -131,6 +130,10 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
     onClose();
   };
 
+  const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
+  const minutes = ['00', '15', '30', '45'];
+  const ampm = ['AM', 'PM'];
+
   if (!isVisible) return null;
 
   return (
@@ -152,22 +155,18 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
             {/* Device Selection */}
             <div className="form-group">
               <label className="activity-label">Device</label>
+
               <select 
-                className="activity-input full" value={formData.device}
+                className="activity-input full" 
+                value={formData.device}
                 onChange={(e) => handleInputChange('device', e.target.value)}
               >              
                 <option value="">Select a device</option>
-                {deviceData.length > 0 ? (
-                  deviceData.map((device) => (
-                    <option key={device.id} value={device.name}>
-                      {device.name} ({device.type})
+                {devices.map((device, index) => (
+                    <option key={index} value={device.deviceName}>
+                      {device.deviceName}
                     </option>
-                  ))
-                ) : (
-                  <>
-                    <option value="no-data" disabled>No Data Found</option>
-                  </>
-                )}
+                  ))}
               </select>
             </div>
 
