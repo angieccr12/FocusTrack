@@ -2,18 +2,19 @@ import React, { useState } from 'react';
 import './AddDevice.css';
 
 const AddDevice = ({ isVisible, onClose, onAddDevice }) => {
-  const [device , setDevice] = useState({ name: '', type: 'selec-type' });
+  const [device, setDevice] = useState({ name: '', type: 'select-type' });
 
   const handleSave = () => {
-    if (device.name && device.type) {
+    // Cambiado: verificar que type no sea 'select-type' en lugar de estar vacío
+    if (device.name && device.type && device.type !== 'select-type') {
       onAddDevice(device);
-      setDevice({ name: '', type: '' });
+      setDevice({ name: '', type: 'select-type' }); // Reset correcto
       onClose();
     }
   };
 
   const handleCancel = () => {
-    setDevice({ name: '', type: '' });
+    setDevice({ name: '', type: 'select-type' }); // Reset correcto
     onClose();
   };
 
@@ -39,12 +40,15 @@ const AddDevice = ({ isVisible, onClose, onAddDevice }) => {
             value={device.type}
             onChange={(e) => setDevice({ ...device, type: e.target.value })}
             className="device-select"
+            style={{ color: device.type === 'select-type' ? '#999' : '#000' }} // Asegurar color visible
           >
-            <option value="selec-type" disabled>Select Type </option>
-            <option value="pc">PC</option>
-            <option value="tablet">Tablet</option>
-            <option value="mobile">Mobile</option>
-            <option value="other">Other</option>
+            <option value="select-type" disabled style={{ color: '#999' }}>
+              Select Type
+            </option>
+            <option value="pc" style={{ color: '#000' }}>PC</option>
+            <option value="tablet" style={{ color: '#000' }}>Tablet</option>
+            <option value="mobile" style={{ color: '#000' }}>Mobile</option>
+            <option value="other" style={{ color: '#000' }}>Other</option>
           </select>
         </div>
 
@@ -52,7 +56,11 @@ const AddDevice = ({ isVisible, onClose, onAddDevice }) => {
           <button onClick={handleCancel} className="btn btn-cancel">
             Cancel
           </button>
-          <button onClick={handleSave} className="btn btn-save" disabled={!device.name || device.type=='selec-type'}>
+          <button 
+            onClick={handleSave} 
+            className="btn btn-save" 
+            disabled={!device.name || device.type === 'select-type'}
+          >
             Save
           </button>
         </div>

@@ -17,7 +17,7 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
     endAmPm: 'AM'
   });
 
-    const existingApps = [
+  const existingApps = [
     'Instagram',
     'YouTube', 
     'Spotify',
@@ -29,9 +29,11 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
     'TikTok'
   ];
 
+  // Función actualizada para obtener el ID del dispositivo
   const getDeviceIdByName = (deviceName) => {
-  const device = devices.find(d => d.deviceName === deviceName);
-  return device ? device.deviceId : null;
+    const device = devices.find(d => d.deviceName === deviceName);
+    // Cambia deviceId por el campo correcto de tu base de datos (probablemente 'id')
+    return device ? device.id : null;
   };
   
   const handleInputChange = (field, value) => {
@@ -39,6 +41,13 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
       ...prev,
       [field]: value
     }));
+  };
+
+  const convertTo24h = (hour, minute, ampm) => {
+    let h = parseInt(hour);
+    if (ampm === 'AM' && h === 12) h = 0;
+    if (ampm === 'PM' && h !== 12) h += 12;
+    return `${h.toString().padStart(2, '0')}:${minute}`;
   };
 
   const handleSubmit = (e) => {
@@ -155,7 +164,6 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
             {/* Device Selection */}
             <div className="form-group">
               <label className="activity-label">Device</label>
-
               <select 
                 className="activity-input full" 
                 value={formData.device}
@@ -163,10 +171,10 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
               >              
                 <option value="">Select a device</option>
                 {devices.map((device, index) => (
-                    <option key={index} value={device.deviceName}>
-                      {device.deviceName}
-                    </option>
-                  ))}
+                  <option key={device.id || index} value={device.deviceName}>
+                    {device.deviceName} ({device.deviceType})
+                  </option>
+                ))}
               </select>
             </div>
 
