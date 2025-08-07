@@ -33,8 +33,9 @@ const Dashboard = () => {
 
   const fetchStatistics = async () => {
     try {
+      setActivityRecords(null);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3000/api/reports/${selectedView}`, {
+      const response = await axios.get(`http://localhost:3000/api/report/${selectedView}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -70,6 +71,7 @@ const Dashboard = () => {
 
       toast.success('Device added successfully');
       setDevices(prev => [...prev, response.data]);
+      await fetchDevices();
       setShowAddDeviceForm(false);
 
     } catch (error) {
@@ -153,9 +155,21 @@ const Dashboard = () => {
         onClose={() => setShowActivityForm(false)}
         onSaveRecord={handleSaveRecord}
         devices={devices}
-        onRefreshDevices={fetchDevices}
       />
 
+      {/*devices.length > 0 && (
+        <div className="devices-list">
+          <h3>Connected Devices</h3>
+          <div className="devices-grid">
+            {devices.map((device) => (
+              <div key={device.deviceId} className="device-card">
+                <span className="device-name">{device.deviceName}</span>
+                <span className="device-type">{device.deviceType}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )*/}
     </div>
   );
 };

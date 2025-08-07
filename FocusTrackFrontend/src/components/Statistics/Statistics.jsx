@@ -15,6 +15,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 const Statistics = ({ selectedView, recordData }) => {
   // Paleta fija
+
   const colors = ['#213448', '#547792', '#94B4C1', '#a87f57', '#4A4947', '#e2e2e2'];
 
   const data = {
@@ -201,7 +202,7 @@ const Statistics = ({ selectedView, recordData }) => {
     },
   };
 
-  const currentData = data[selectedView];
+  const currentData = recordData || {};
 
   return (
     <div className="statistics-container">
@@ -213,13 +214,17 @@ const Statistics = ({ selectedView, recordData }) => {
             <div className="chart-card">
               <h3>Daily Usage by Device</h3>
               <div className="chart-wrapper">
-                <Bar data={currentData.daily} options={stackedBarOptions} />
+                {currentData.daily ? (
+                  <Bar data={currentData.daily} options={stackedBarOptions} />
+                ) : <p>No data available.</p>}
               </div>
             </div>
             <div className="chart-card">
               <h3>Weekly Usage by Device</h3>
               <div className="chart-wrapper">
-                <Bar data={currentData.weekly} options={stackedBarOptions} />
+                {currentData.weekly ? (
+                  <Bar data={currentData.weekly} options={stackedBarOptions} />
+                ) : <p>No data available.</p>}
               </div>
             </div>
           </div>
@@ -231,13 +236,17 @@ const Statistics = ({ selectedView, recordData }) => {
               <div className="chart-card">
                 <h3>Daily</h3>
                 <div className="chart-wrapper">
-                  <Doughnut data={currentData.daily} options={chartOptions} />
+                  {currentData.daily ? (
+                    <Doughnut data={currentData.daily} options={chartOptions} />
+                  ) : <p>No data available.</p>}
                 </div>
               </div>
               <div className="chart-card">
                 <h3>Weekly</h3>
                 <div className="chart-wrapper">
-                  <Doughnut data={currentData.weekly} options={chartOptions} />
+                  {currentData.weekly ? (
+                    <Doughnut data={currentData.weekly} options={chartOptions} />
+                  ) : <p>No data available.</p>}
                 </div>
               </div>
             </div>
@@ -248,13 +257,17 @@ const Statistics = ({ selectedView, recordData }) => {
               <div className="chart-card">
                 <h3>Daily Hours</h3>
                 <div className="chart-wrapper">
-                  <Bar data={currentData.barDaily} options={barOptions} />
+                  {currentData.barDaily ? (
+                    <Bar data={currentData.barDaily} options={barOptions} />
+                  ) : <p>No data available.</p>}
                 </div>
               </div>
               <div className="chart-card">
                 <h3>Weekly Hours</h3>
                 <div className="chart-wrapper">
-                  <Bar data={currentData.barWeekly} options={barOptions} />
+                  {currentData.barWeekly ? (
+                    <Bar data={currentData.barWeekly} options={barOptions} />
+                  ) : <p>No data available.</p>}
                 </div>
               </div>
             </div>

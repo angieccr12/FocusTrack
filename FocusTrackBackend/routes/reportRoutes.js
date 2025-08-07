@@ -28,11 +28,11 @@ router.get('/:view', authenticateToken, async (req, res) => {
       const fetchData = async (days) => {
         const result = await pool.query(`
           SELECT a."appName" AS label,
-                 SUM(EXTRACT(EPOCH FROM (ar."endTime" - ar."startTime")) / 3600)::NUMERIC(5,2) AS value
+                SUM(EXTRACT(EPOCH FROM (ar."endTime" - ar."startTime")) / 3600)::NUMERIC(5,2) AS value
           FROM "ActivityRecord" ar
           JOIN "App" a ON ar."appId" = a."appId"
           JOIN "Device" d ON ar."deviceId" = d."deviceId"
-          WHERE d."userId" = $1 AND ar."recordDate" >= CURRENT_DATE - $2
+          WHERE d."userId" = $1 AND ar."recordDate" >= CURRENT_DATE - ($2 || ' days')::interval
           GROUP BY a."appName"
           ORDER BY value DESC
         `, [userId, days]);
@@ -52,10 +52,10 @@ router.get('/:view', authenticateToken, async (req, res) => {
       const fetchData = async (days) => {
         const result = await pool.query(`
           SELECT d."deviceName" AS label,
-                 SUM(EXTRACT(EPOCH FROM (ar."endTime" - ar."startTime")) / 3600)::NUMERIC(5,2) AS value
+                SUM(EXTRACT(EPOCH FROM (ar."endTime" - ar."startTime")) / 3600)::NUMERIC(5,2) AS value
           FROM "ActivityRecord" ar
           JOIN "Device" d ON ar."deviceId" = d."deviceId"
-          WHERE d."userId" = $1 AND ar."recordDate" >= CURRENT_DATE - $2
+          WHERE d."userId" = $1 AND ar."recordDate" >= CURRENT_DATE - ($2 || ' days')::interval
           GROUP BY d."deviceName"
           ORDER BY value DESC
         `, [userId, days]);
@@ -75,11 +75,11 @@ router.get('/:view', authenticateToken, async (req, res) => {
       const fetchData = async (days) => {
         const result = await pool.query(`
           SELECT d."deviceName", a."appName",
-                 SUM(EXTRACT(EPOCH FROM (ar."endTime" - ar."startTime")) / 3600)::NUMERIC(5,2) AS total_hours
+                SUM(EXTRACT(EPOCH FROM (ar."endTime" - ar."startTime")) / 3600)::NUMERIC(5,2) AS total_hours
           FROM "ActivityRecord" ar
           JOIN "App" a ON ar."appId" = a."appId"
           JOIN "Device" d ON ar."deviceId" = d."deviceId"
-          WHERE d."userId" = $1 AND ar."recordDate" >= CURRENT_DATE - $2
+          WHERE d."userId" = $1 AND ar."recordDate" >= CURRENT_DATE - ($2 || ' days')::interval
           GROUP BY d."deviceName", a."appName"
           ORDER BY d."deviceName"
         `, [userId, days]);

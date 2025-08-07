@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import './NewActivityRecord.css';
 
-const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [], onRefreshDevices }) => {
+const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) => {
   const [customApp, setCustomApp] = useState(false);
   const [formData, setFormData] = useState({
     device: '',
@@ -29,21 +29,12 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [], onR
     'TikTok'
   ];
 
-  // Efecto para refrescar dispositivos cuando se abre el modal
-  useEffect(() => {
-    if (isVisible && onRefreshDevices) {
-      onRefreshDevices();
-    }
-  }, [isVisible, onRefreshDevices]);
-
   // Función actualizada para obtener el ID del dispositivo
   const getDeviceIdByName = (deviceName) => {
     const device = devices.find(d => d.deviceName === deviceName);
     // Cambia deviceId por el campo correcto de tu base de datos (probablemente 'id')
-    return device ? device.id : null;
+    return device ? device.deviceId : null;
   };
-
-
   
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -97,20 +88,7 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [], onR
       endTime: convertTo24h(formData.endHour, formData.endMinute, formData.endAmPm)
     };
 
-    axios.post('http://localhost:3000/api/activity', recordData, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-    .then(() => {
-      alert('Record saved successfully!');
-      handleReset();
-      onClose();
-    })
-    .catch(err => {
-      console.error(err);
-      alert('Error saving record');
-    });
+    onSaveRecord(recordData);
   };
 
   const convertToMinutes = (hour, minute, ampm) => {
