@@ -153,21 +153,9 @@ const Dashboard = () => {
         onClose={() => setShowActivityForm(false)}
         onSaveRecord={handleSaveRecord}
         devices={devices}
+        onRefreshDevices={fetchDevices}
       />
 
-      {/*devices.length > 0 && (
-        <div className="devices-list">
-          <h3>Connected Devices</h3>
-          <div className="devices-grid">
-            {devices.map((device) => (
-              <div key={device.deviceId} className="device-card">
-                <span className="device-name">{device.deviceName}</span>
-                <span className="device-type">{device.deviceType}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )*/}
     </div>
   );
 };

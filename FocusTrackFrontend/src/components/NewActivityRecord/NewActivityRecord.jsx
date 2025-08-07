@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import './NewActivityRecord.css';
 
-const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) => {
+const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [], onRefreshDevices }) => {
   const [customApp, setCustomApp] = useState(false);
   const [formData, setFormData] = useState({
     device: '',
@@ -29,12 +29,21 @@ const NewActivityRecord = ({ isVisible, onClose, onSaveRecord, devices = [] }) =
     'TikTok'
   ];
 
+  // Efecto para refrescar dispositivos cuando se abre el modal
+  useEffect(() => {
+    if (isVisible && onRefreshDevices) {
+      onRefreshDevices();
+    }
+  }, [isVisible, onRefreshDevices]);
+
   // Función actualizada para obtener el ID del dispositivo
   const getDeviceIdByName = (deviceName) => {
     const device = devices.find(d => d.deviceName === deviceName);
     // Cambia deviceId por el campo correcto de tu base de datos (probablemente 'id')
     return device ? device.id : null;
   };
+
+
   
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
