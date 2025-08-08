@@ -1,12 +1,71 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# FocusTrack – Frontend
 
-Currently, two official plugins are available:
+Este es el frontend de **FocusTrack**, una aplicación web para visualizar el tiempo que los usuarios dedican a distintos dispositivos, apps o sitios web. Se centra en concienciar sobre el uso del tiempo frente a pantallas a través de estadísticas visuales.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tecnologías utilizadas
 
-## Expanding the ESLint configuration
+- React
+- Vite
+- CSS
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Requisitos previos
+
+- [Node.js](https://nodejs.org/)
+
+## Instalación y ejecución
+
+1. Clona el repositorio:
+   ```bash
+   git clone <url-del-repo>
+   cd FOCUSTRACKFRONTEND
+   ```
+
+2. Instala las dependencias:
+
+   ```bash
+   npm install
+   ```
+
+3. Ejecuta el servidor de desarrollo:
+
+   ```bash
+   npm run dev
+   ```
+
+   Esto levantará la app en `http://localhost:5173` (puerto por defecto de Vite).
+
+## Estructura del proyecto
+
+```
+FOCUSTRACKFRONTEND/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   │   ├── AddDevice/
+│   │   ├── Dashboard/
+│   │   ├── Login/
+│   │   ├── NewActivityRecord/
+│   │   ├── RecoverPassword/
+│   │   ├── SignUp/
+│   │   └── Statistics/
+│   ├── App.jsx
+│   ├── main.jsx
+│   ├── App.css
+│   ├── index.css
+│   └── variables.css
+├── public/
+├── vite.config.js
+```
+
+## Funcionalidades principales
+
+- Registro e inicio de sesión
+- Registro de actividades por dispositivo/app/web
+- Visualización de estadísticas por día/semana
+- Dashboard personalizado
+
+
+## Autor
+
+Desarrollado por angieccr12 - Sofiaflorezz.
